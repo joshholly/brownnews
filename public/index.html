@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brown News — Cyclospora Recall Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Brown News</h1>
+    <p class="tagline">Protecting America's Underwear, One Recall at a Time</p>
+  </header>
+
+  <div class="disclaimer-banner">
+    <strong>Not an official alert system.</strong> This site aggregates publicly
+    available FDA recall records for informational purposes only. It is not
+    medical advice. Data may be incomplete or delayed — always confirm against
+    the <a href="https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts" target="_blank" rel="noopener">official FDA recall record</a>.
+    Consult a healthcare provider for medical concerns.
+  </div>
+
+  <main>
+    <section id="kpis" class="kpi-row"></section>
+    <section id="severity" class="severity-row"></section>
+    <section id="state-chart" class="state-chart"></section>
+    <section id="recalls"></section>
+  </main>
+
+  <footer>
+    <p>
+      Data sourced from
+      <a href="https://open.fda.gov/apis/food/enforcement/" target="_blank" rel="noopener">openFDA</a>.
+      Not medical advice. Not an official recall alert system.
+    </p>
+    <p>
+      <a href="https://github.com/joshholly/brownnews" target="_blank" rel="noopener">View on GitHub</a>
+    </p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -32,7 +32,7 @@ function renderKpis(stats, ongoingCount) {
   const tiles = [
     { value: stats.total, label: 'Recalls tracked' },
     { value: ongoingCount, label: 'Currently ongoing' },
-    { value: formatDate(stats.most_recent_date), label: 'Most recent report' },
+    { value: formatDate(stats.most_recent_date), label: 'Most recent recall' },
   ];
 
   for (const tile of tiles) {

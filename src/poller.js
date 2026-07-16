@@ -5,6 +5,7 @@ const OPENFDA_URL = 'https://api.fda.gov/food/enforcement.json';
 export async function fetchOpenFDA(apiKey) {
   const params = new URLSearchParams({
     search: 'reason_for_recall:cyclospora',
+    sort: 'recall_initiation_date:desc',
     limit: '1000',
   });
   if (apiKey) {

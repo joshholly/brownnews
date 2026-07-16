@@ -1,0 +1,21 @@
+{
+  "name": "brownnews",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tracks Cyclospora-related food recalls from the openFDA API and presents them in plain English.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "migrate": "node src/migrate.js",
+    "poll": "node src/poll-once.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "node-cron": "^4.6.0",
+    "pg": "^8.22.0"
+  }
+}

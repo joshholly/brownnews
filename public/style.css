@@ -85,6 +85,7 @@ main {
   border-radius: 8px;
   padding: 0.75rem 1rem;
   text-align: center;
+  min-width: 0;
 }
 
 .kpi-value {
@@ -92,6 +93,7 @@ main {
   font-size: 1.75rem;
   font-weight: 600;
   color: var(--text-primary);
+  overflow-wrap: break-word;
 }
 
 .kpi-label {

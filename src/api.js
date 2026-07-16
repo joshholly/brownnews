@@ -73,6 +73,33 @@ router.get('/recalls/:recall_number', async (req, res) => {
   }
 });
 
+router.get('/logo', async (req, res) => {
+  const { firm } = req.query;
+
+  if (!firm) {
+    return res.status(400).json({ error: 'Missing firm query parameter' });
+  }
+
+  try {
+    const logoUrl = `https://img.logo.dev/name/${encodeURIComponent(firm)}?token=${process.env.LOGO_DEV_TOKEN}`;
+    const logoResponse = await fetch(logoUrl);
+
+    if (!logoResponse.ok) {
+      return res.status(404).end();
+    }
+
+    const contentType = logoResponse.headers.get('content-type') ?? 'image/png';
+    const buffer = Buffer.from(await logoResponse.arrayBuffer());
+
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    console.error('GET /api/logo failed:', err);
+    res.status(502).end();
+  }
+});
+
 router.get('/stats', async (req, res) => {
   try {
     const [byClassification, byState, totals] = await Promise.all([

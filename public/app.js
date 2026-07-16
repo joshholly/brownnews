@@ -101,7 +101,7 @@ function renderRecallCard(recall) {
   card.innerHTML =
     '<span class="badge"></span>' +
     '<span class="status-tag"></span>' +
-    '<h2></h2>' +
+    '<h2 class="firm-heading"><img class="firm-logo" alt="" /><span class="firm-name"></span></h2>' +
     '<p class="product"></p>' +
     '<p class="reason"></p>' +
     '<p class="distribution"></p>' +
@@ -110,7 +110,18 @@ function renderRecallCard(recall) {
 
   card.querySelector('.badge').textContent = recall.classification ?? 'Unclassified';
   card.querySelector('.status-tag').textContent = recall.status ?? '';
-  card.querySelector('h2').textContent = recall.firm ?? 'Unknown firm';
+  card.querySelector('.firm-name').textContent = recall.firm ?? 'Unknown firm';
+
+  const logo = card.querySelector('.firm-logo');
+  if (recall.firm) {
+    logo.src = `/api/logo?firm=${encodeURIComponent(recall.firm)}`;
+    logo.onerror = () => {
+      logo.style.display = 'none';
+    };
+  } else {
+    logo.style.display = 'none';
+  }
+
   card.querySelector('.product').textContent = recall.brand ?? recall.product ?? 'Unnamed product';
   card.querySelector('.reason').textContent = recall.reason ?? '';
   card.querySelector('.distribution').textContent = `Distribution: ${recall.distribution ?? 'Unknown'}`;

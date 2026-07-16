@@ -8,6 +8,15 @@ function classificationMeta(classification) {
   return CLASSIFICATION_META[classification] ?? { dotClass: 'class-iii', cardClass: 'class-iii' };
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) {
+    return 'n/a';
+  }
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 async function fetchJSON(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -23,7 +32,7 @@ function renderKpis(stats, ongoingCount) {
   const tiles = [
     { value: stats.total, label: 'Recalls tracked' },
     { value: ongoingCount, label: 'Currently ongoing' },
-    { value: stats.most_recent_date ?? 'n/a', label: 'Most recent report' },
+    { value: formatDate(stats.most_recent_date), label: 'Most recent report' },
   ];
 
   for (const tile of tiles) {
@@ -126,7 +135,7 @@ function renderRecallCard(recall) {
   card.querySelector('.reason').textContent = recall.reason ?? '';
   card.querySelector('.distribution').textContent = `Distribution: ${recall.distribution ?? 'Unknown'}`;
   card.querySelector('.dates').textContent =
-    `Initiated: ${recall.initiation_date ?? 'n/a'} · Reported: ${recall.report_date ?? 'n/a'}`;
+    `Initiated: ${formatDate(recall.initiation_date)} · Reported: ${formatDate(recall.report_date)}`;
   card.querySelector('.source-link').href = sourceRecordUrl(recall.recall_number);
 
   return card;

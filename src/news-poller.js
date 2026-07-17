@@ -2,6 +2,8 @@ import { pool } from './db.js';
 
 const NEWSAPI_URL = 'https://newsapi.org/v2/everything';
 const BLOCKED_SOURCE_NAME = 'Biztoc.com';
+const NIGHTLY_PAGE_SIZE = 30;
+const FIRST_RUN_PAGE_SIZE = 60;
 
 function formatDateInTimeZone(date, timeZone) {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -18,13 +20,13 @@ export function todayInCentralTime() {
   return formatDateInTimeZone(new Date(), 'America/Chicago');
 }
 
-export async function fetchNewsAPI(apiKey, fromDate) {
+export async function fetchNewsAPI(apiKey, fromDate, pageSize = NIGHTLY_PAGE_SIZE) {
   const params = new URLSearchParams({
     q: 'Cyclospora',
     from: fromDate,
     sortBy: 'publishedAt',
     language: 'en',
-    pageSize: '30',
+    pageSize: String(pageSize),
     apiKey,
   });
 
@@ -86,10 +88,25 @@ export async function upsertArticle(client, article) {
   ]);
 }
 
+export async function isNewsArticlesTableEmpty(client) {
+  const { rows } = await client.query('SELECT COUNT(*) AS total FROM news_articles');
+  return Number(rows[0].total) === 0;
+}
+
 export async function pollNewsOnce() {
+  let isFirstRun;
+  try {
+    isFirstRun = await isNewsArticlesTableEmpty(pool);
+  } catch (err) {
+    console.error('Failed to check news_articles table state, defaulting to the nightly page size:', err.message);
+    isFirstRun = false;
+  }
+
+  const pageSize = isFirstRun ? FIRST_RUN_PAGE_SIZE : NIGHTLY_PAGE_SIZE;
+
   let rawArticles;
   try {
-    rawArticles = await fetchNewsAPI(process.env.NEWSAPI_KEY, todayInCentralTime());
+    rawArticles = await fetchNewsAPI(process.env.NEWSAPI_KEY, todayInCentralTime(), pageSize);
   } catch (err) {
     console.error('NewsAPI poll failed, skipping this run:', err.message);
     return;
@@ -98,7 +115,9 @@ export async function pollNewsOnce() {
   const filtered = rawArticles.filter((raw) => !isBlockedSource(raw));
   const blockedCount = rawArticles.length - filtered.length;
 
-  console.log(`NewsAPI returned ${rawArticles.length} article(s), ${blockedCount} filtered (Biztoc.com)`);
+  console.log(
+    `NewsAPI returned ${rawArticles.length} article(s) (pageSize=${pageSize}${isFirstRun ? ', first run' : ''}), ${blockedCount} filtered (Biztoc.com)`
+  );
 
   for (const raw of filtered) {
     const article = normalizeArticle(raw);

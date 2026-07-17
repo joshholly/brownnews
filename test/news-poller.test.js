@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchNewsAPI, isBlockedSource, normalizeArticle, upsertArticle } from '../src/news-poller.js';
+import {
+  fetchNewsAPI,
+  isBlockedSource,
+  isNewsArticlesTableEmpty,
+  normalizeArticle,
+  upsertArticle,
+} from '../src/news-poller.js';
 
 const SAMPLE_RAW_ARTICLE = {
   source: { id: null, name: 'Reuters' },
@@ -34,6 +40,14 @@ test('fetchNewsAPI throws on a non-ok NewsAPI error response', async (t) => {
 test('isBlockedSource filters out Biztoc.com articles', () => {
   assert.strictEqual(isBlockedSource({ source: { name: 'Biztoc.com' } }), true);
   assert.strictEqual(isBlockedSource(SAMPLE_RAW_ARTICLE), false);
+});
+
+test('isNewsArticlesTableEmpty reflects the count from the client', async () => {
+  const emptyClient = { query: async () => ({ rows: [{ total: '0' }] }) };
+  const populatedClient = { query: async () => ({ rows: [{ total: '42' }] }) };
+
+  assert.strictEqual(await isNewsArticlesTableEmpty(emptyClient), true);
+  assert.strictEqual(await isNewsArticlesTableEmpty(populatedClient), false);
 });
 
 test('upsertArticle targets ON CONFLICT (url) DO UPDATE and is repeatable', async () => {

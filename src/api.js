@@ -5,6 +5,12 @@ const DISCLAIMER =
   'Data sourced from openFDA and may be incomplete or delayed. Not medical advice. ' +
   'This is not an official recall alert system — always confirm against the official FDA recall record.';
 
+const NEWS_DISCLAIMER =
+  'News articles are pulled automatically from third-party sources via NewsAPI.org. ' +
+  'They are independent news coverage, not official CDC or FDA data, and are not verified by Brown News.';
+
+const NEWS_PAGE_SIZE = 30;
+
 export const router = Router();
 
 function parseLimit(rawLimit) {
@@ -13,6 +19,14 @@ function parseLimit(rawLimit) {
     return 100;
   }
   return Math.min(parsed, 1000);
+}
+
+function parsePage(rawPage) {
+  const parsed = Math.trunc(Number(rawPage));
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return 1;
+  }
+  return parsed;
 }
 
 router.get('/recalls', async (req, res) => {
@@ -69,6 +83,37 @@ router.get('/recalls/:recall_number', async (req, res) => {
     res.json({ meta: { disclaimer: DISCLAIMER }, result: rows[0] });
   } catch (err) {
     console.error('GET /api/recalls/:recall_number failed:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/news', async (req, res) => {
+  try {
+    const page = parsePage(req.query.page);
+    const offset = (page - 1) * NEWS_PAGE_SIZE;
+
+    const [articlesResult, countResult] = await Promise.all([
+      query(
+        `SELECT url, title, description, content, url_to_image, source_name, author, published_at
+         FROM news_articles
+         ORDER BY published_at DESC NULLS LAST
+         LIMIT $1 OFFSET $2`,
+        [NEWS_PAGE_SIZE, offset]
+      ),
+      query('SELECT COUNT(*) AS total FROM news_articles'),
+    ]);
+
+    const total = Number(countResult.rows[0].total);
+    const totalPages = Math.max(1, Math.ceil(total / NEWS_PAGE_SIZE));
+
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.json({
+      meta: { disclaimer: NEWS_DISCLAIMER },
+      results: articlesResult.rows,
+      pagination: { page, pageSize: NEWS_PAGE_SIZE, total, totalPages },
+    });
+  } catch (err) {
+    console.error('GET /api/news failed:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

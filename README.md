@@ -2,9 +2,13 @@
 
 **Protecting America's Underwear, One Recall at a Time.**
 
-Brown News aggregates publicly available FDA food enforcement (recall) records
-related to Cyclospora and presents them in a plain-English, "what to avoid"
-format.
+Brown News tracks Cyclospora in two ways: a **News** tab pulling the latest
+news coverage of Cyclospora outbreaks (via [NewsAPI.org](https://newsapi.org)),
+and an **FDA Data** tab aggregating publicly available FDA food enforcement
+(recall) records (via [openFDA](https://open.fda.gov/apis/food/enforcement/)),
+both presented in a plain-English, "what to avoid" format. Recall cards also
+show the recalling firm's logo, fetched server-side via
+[logo.dev](https://logo.dev) so the API token never reaches the browser.
 
 ## Disclaimer
 
@@ -48,11 +52,13 @@ Vanilla HTML/CSS/JS frontend, no build step.
    ```bash
    npm run poll
    ```
-5. Seed today's news feed (optional — only captures *today's* articles; the
-   daily cron accumulates history from here):
+5. Seed the news feed:
    ```bash
    npm run poll-news
    ```
+   The very first run backfills from July 14, 2026 (60 articles); every run
+   after that only fetches that day's articles (30/day) since the table is
+   no longer empty.
 6. Start the app:
    ```bash
    npm run dev    # local development, auto-restarts on file changes
@@ -65,7 +71,8 @@ Vanilla HTML/CSS/JS frontend, no build step.
 - `GET /api/recalls` — list of recalls, newest first. Filters: `?state=`, `?status=`, `?since=YYYY-MM-DD`, `?limit=`.
 - `GET /api/recalls/:recall_number` — a single recall record, including the full raw openFDA payload.
 - `GET /api/stats` — counts by classification and state, total count, most recent date.
-- `GET /api/news` — list of news articles, newest first. Optional `?limit=`.
+- `GET /api/news` — paginated list of news articles, newest first, 30 per page. `?page=` (default 1). Response includes a `pagination` object (`page`, `pageSize`, `total`, `totalPages`).
+- `GET /api/logo?firm=` — proxies a firm's logo from logo.dev (used by the frontend, not meant for direct browsing).
 
 ## Tests
 

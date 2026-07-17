@@ -4,6 +4,7 @@ const NEWSAPI_URL = 'https://newsapi.org/v2/everything';
 const BLOCKED_SOURCE_NAME = 'Biztoc.com';
 const NIGHTLY_PAGE_SIZE = 30;
 const FIRST_RUN_PAGE_SIZE = 60;
+const FIRST_RUN_FROM_DATE = '2026-07-14';
 
 function formatDateInTimeZone(date, timeZone) {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -103,10 +104,11 @@ export async function pollNewsOnce() {
   }
 
   const pageSize = isFirstRun ? FIRST_RUN_PAGE_SIZE : NIGHTLY_PAGE_SIZE;
+  const fromDate = isFirstRun ? FIRST_RUN_FROM_DATE : todayInCentralTime();
 
   let rawArticles;
   try {
-    rawArticles = await fetchNewsAPI(process.env.NEWSAPI_KEY, todayInCentralTime(), pageSize);
+    rawArticles = await fetchNewsAPI(process.env.NEWSAPI_KEY, fromDate, pageSize);
   } catch (err) {
     console.error('NewsAPI poll failed, skipping this run:', err.message);
     return;
@@ -116,7 +118,7 @@ export async function pollNewsOnce() {
   const blockedCount = rawArticles.length - filtered.length;
 
   console.log(
-    `NewsAPI returned ${rawArticles.length} article(s) (pageSize=${pageSize}${isFirstRun ? ', first run' : ''}), ${blockedCount} filtered (Biztoc.com)`
+    `NewsAPI returned ${rawArticles.length} article(s) (from=${fromDate}, pageSize=${pageSize}${isFirstRun ? ', first run' : ''}), ${blockedCount} filtered (Biztoc.com)`
   );
 
   for (const raw of filtered) {

@@ -268,3 +268,129 @@ footer {
   padding: 1rem;
   color: var(--text-muted);
 }
+
+.tab-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab-button {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: var(--page-bg);
+  font-weight: 600;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
+.news-disclaimer {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 1rem 0 1rem;
+}
+
+.news-card {
+  display: flex;
+  gap: 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.news-card-image-wrap {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.news-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-card-image.is-fallback {
+  object-fit: contain;
+  background: var(--page-bg);
+  padding: 8px;
+}
+
+.news-card-body {
+  min-width: 0;
+}
+
+.news-card-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.news-card-description {
+  margin: 0 0 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.news-card-content {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.news-card-meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.pagination-button {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-primary);
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pagination-button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pagination-status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

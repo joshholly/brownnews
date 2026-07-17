@@ -17,6 +17,27 @@ function formatDate(dateStr) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+function initTabs() {
+  const buttons = document.querySelectorAll('.tab-button');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      const target = button.dataset.tab;
+
+      for (const btn of buttons) {
+        const isActive = btn === button;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', String(isActive));
+      }
+
+      for (const panel of panels) {
+        panel.hidden = panel.id !== `tab-${target}`;
+      }
+    });
+  }
+}
+
 async function fetchJSON(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -98,6 +119,119 @@ function renderStateChart(byState) {
   }
 }
 
+function formatPublishedDate(isoString) {
+  if (!isoString) {
+    return 'n/a';
+  }
+  return new Date(isoString).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function renderNewsCard(article) {
+  const card = document.createElement('a');
+  card.className = 'news-card';
+  card.target = '_blank';
+  card.rel = 'noopener';
+  card.href = article.url;
+  card.innerHTML =
+    '<div class="news-card-image-wrap"><img class="news-card-image" alt="" /></div>' +
+    '<div class="news-card-body">' +
+    '<h2 class="news-card-title"></h2>' +
+    '<p class="news-card-description"></p>' +
+    '<p class="news-card-content"></p>' +
+    '<p class="news-card-meta"></p>' +
+    '</div>';
+
+  const img = card.querySelector('.news-card-image');
+  const useFallback = () => {
+    img.onerror = null;
+    img.src = '/og-image.png';
+    img.classList.add('is-fallback');
+  };
+  if (article.url_to_image) {
+    img.src = article.url_to_image;
+    img.onerror = useFallback;
+  } else {
+    useFallback();
+  }
+
+  card.querySelector('.news-card-title').textContent = article.title ?? 'Untitled article';
+  card.querySelector('.news-card-description').textContent = article.description ?? '';
+  card.querySelector('.news-card-content').textContent = article.content ?? '';
+  card.querySelector('.news-card-meta').textContent =
+    `${article.source_name ?? 'Unknown source'} · ${formatPublishedDate(article.published_at)}`;
+
+  return card;
+}
+
+function renderPagination(pagination, onPageChange) {
+  const nav = document.getElementById('news-pagination');
+  nav.innerHTML = '';
+
+  if (pagination.totalPages <= 1) {
+    return;
+  }
+
+  const prevButton = document.createElement('button');
+  prevButton.className = 'pagination-button';
+  prevButton.type = 'button';
+  prevButton.textContent = '‹ Previous';
+  prevButton.disabled = pagination.page <= 1;
+  prevButton.addEventListener('click', () => onPageChange(pagination.page - 1));
+
+  const status = document.createElement('span');
+  status.className = 'pagination-status';
+  status.textContent = `Page ${pagination.page} of ${pagination.totalPages}`;
+
+  const nextButton = document.createElement('button');
+  nextButton.className = 'pagination-button';
+  nextButton.type = 'button';
+  nextButton.textContent = 'Next ›';
+  nextButton.disabled = pagination.page >= pagination.totalPages;
+  nextButton.addEventListener('click', () => onPageChange(pagination.page + 1));
+
+  nav.appendChild(prevButton);
+  nav.appendChild(status);
+  nav.appendChild(nextButton);
+}
+
+function renderNewsFeed(articles) {
+  const container = document.getElementById('news-feed');
+  container.innerHTML = '';
+
+  if (articles.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = 'No recent news articles found.';
+    container.appendChild(empty);
+    return;
+  }
+
+  for (const article of articles) {
+    container.appendChild(renderNewsCard(article));
+  }
+}
+
+async function loadNewsPage(page) {
+  try {
+    const newsData = await fetchJSON(`/api/news?page=${page}`);
+    renderNewsFeed(newsData.results);
+    renderPagination(newsData.pagination, loadNewsPage);
+  } catch (err) {
+    console.error('Failed to load news data:', err);
+    const container = document.getElementById('news-feed');
+    container.innerHTML = '';
+    const error = document.createElement('p');
+    error.className = 'error-state';
+    error.textContent = 'Could not load news articles. Please try again later.';
+    container.appendChild(error);
+    document.getElementById('news-pagination').innerHTML = '';
+  }
+}
+
 function sourceRecordUrl(recallNumber) {
   const search = `recall_number:"${recallNumber}"`;
   return `https://api.fda.gov/food/enforcement.json?search=${encodeURIComponent(search)}`;
@@ -159,25 +293,29 @@ function renderRecalls(recalls) {
 }
 
 async function init() {
-  const [stats, recallsData] = await Promise.all([
-    fetchJSON('/api/stats'),
-    fetchJSON('/api/recalls'),
-  ]);
+  initTabs();
 
-  const ongoingCount = recallsData.results.filter((r) => r.status === 'Ongoing').length;
+  try {
+    const [stats, recallsData] = await Promise.all([
+      fetchJSON('/api/stats'),
+      fetchJSON('/api/recalls'),
+    ]);
+    const ongoingCount = recallsData.results.filter((r) => r.status === 'Ongoing').length;
+    renderKpis(stats, ongoingCount);
+    renderSeverity(stats.by_classification);
+    renderStateChart(stats.by_state);
+    renderRecalls(recallsData.results);
+  } catch (err) {
+    console.error('Failed to load recall data:', err);
+    const container = document.getElementById('recalls');
+    container.innerHTML = '';
+    const error = document.createElement('p');
+    error.className = 'error-state';
+    error.textContent = 'Could not load recall data. Please try again later.';
+    container.appendChild(error);
+  }
 
-  renderKpis(stats, ongoingCount);
-  renderSeverity(stats.by_classification);
-  renderStateChart(stats.by_state);
-  renderRecalls(recallsData.results);
+  await loadNewsPage(1);
 }
 
-init().catch((err) => {
-  console.error('Failed to load recall data:', err);
-  const container = document.getElementById('recalls');
-  container.innerHTML = '';
-  const error = document.createElement('p');
-  error.className = 'error-state';
-  error.textContent = 'Could not load recall data. Please try again later.';
-  container.appendChild(error);
-});
+init();

@@ -4,6 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brown News — Cyclospora Recall Tracker</title>
+
+  <meta name="description" content="Protecting America's Underwear, One Recall at a Time — Cyclospora food recall tracking and news, sourced from openFDA and NewsAPI." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Brown News" />
+  <meta property="og:description" content="Protecting America's Underwear, One Recall at a Time" />
+  <meta property="og:image" content="https://brownnews.io/og-image.png" />
+  <meta property="og:url" content="https://brownnews.io" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Brown News" />
+  <meta name="twitter:description" content="Protecting America's Underwear, One Recall at a Time" />
+  <meta name="twitter:image" content="https://brownnews.io/og-image.png" />
+
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -20,11 +34,27 @@
     Consult a healthcare provider for medical concerns.
   </div>
 
+  <div class="tab-nav" role="tablist">
+    <button class="tab-button active" data-tab="news" role="tab" aria-selected="true">News</button>
+    <button class="tab-button" data-tab="fda-data" role="tab" aria-selected="false">FDA Data</button>
+  </div>
+
   <main>
-    <section id="kpis" class="kpi-row"></section>
-    <section id="severity" class="severity-row"></section>
-    <section id="state-chart" class="state-chart"></section>
-    <section id="recalls"></section>
+    <div id="tab-news" class="tab-panel">
+      <p class="news-disclaimer">
+        News articles are pulled automatically from third-party sources and are
+        independent reporting — not official CDC or FDA data.
+      </p>
+      <section id="news-feed"></section>
+      <nav id="news-pagination" class="pagination"></nav>
+    </div>
+
+    <div id="tab-fda-data" class="tab-panel" hidden>
+      <section id="kpis" class="kpi-row"></section>
+      <section id="severity" class="severity-row"></section>
+      <section id="state-chart" class="state-chart"></section>
+      <section id="recalls"></section>
+    </div>
   </main>
 
   <footer>

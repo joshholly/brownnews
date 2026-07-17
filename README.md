@@ -37,6 +37,9 @@ Vanilla HTML/CSS/JS frontend, no build step.
    - `LOGO_DEV_TOKEN` — optional; a [logo.dev](https://logo.dev) API token used
      server-side to show recalling-firm logos on recall cards. Recall cards
      work fine without it (logos are simply omitted).
+   - `NEWSAPI_KEY` — a [NewsAPI.org](https://newsapi.org) API key used
+     server-side to power the News tab. Without it, the news poller logs an
+     error and is skipped; the rest of the site works fine.
 3. Apply the database schema:
    ```bash
    npm run migrate
@@ -45,7 +48,12 @@ Vanilla HTML/CSS/JS frontend, no build step.
    ```bash
    npm run poll
    ```
-5. Start the app:
+5. Seed today's news feed (optional — only captures *today's* articles; the
+   daily cron accumulates history from here):
+   ```bash
+   npm run poll-news
+   ```
+6. Start the app:
    ```bash
    npm run dev    # local development, auto-restarts on file changes
    npm start       # production
@@ -57,6 +65,7 @@ Vanilla HTML/CSS/JS frontend, no build step.
 - `GET /api/recalls` — list of recalls, newest first. Filters: `?state=`, `?status=`, `?since=YYYY-MM-DD`, `?limit=`.
 - `GET /api/recalls/:recall_number` — a single recall record, including the full raw openFDA payload.
 - `GET /api/stats` — counts by classification and state, total count, most recent date.
+- `GET /api/news` — list of news articles, newest first. Optional `?limit=`.
 
 ## Tests
 
@@ -64,9 +73,10 @@ Vanilla HTML/CSS/JS frontend, no build step.
 npm test
 ```
 
-Runs two smoke tests covering the trickiest behaviors: treating an openFDA 404
-as an empty result set (not an error), and idempotent upserts keyed on
-`recall_number`.
+Runs smoke tests covering the trickiest behaviors: treating an openFDA 404 as
+an empty result set (not an error), idempotent upserts keyed on
+`recall_number`, NewsAPI error handling, Biztoc.com source filtering, and
+idempotent upserts keyed on `url`.
 
 ## License
 

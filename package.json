@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "migrate": "node src/migrate.js",
     "poll": "node src/poll-once.js",
+    "poll-news": "node src/news-poll-once.js",
     "test": "node --test"
   },
   "dependencies": {

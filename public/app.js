@@ -258,7 +258,7 @@ function renderRecallCard(recall) {
 
   const logo = card.querySelector('.firm-logo');
   if (recall.firm) {
-    logo.src = `/api/logo?firm=${encodeURIComponent(recall.firm)}`;
+    logo.src = `/api/logo?firm=${encodeURIComponent(recall.firm)}&v=2`;
     logo.onerror = () => {
       logo.style.display = 'none';
     };

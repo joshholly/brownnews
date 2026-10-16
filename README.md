@@ -72,7 +72,7 @@ Vanilla HTML/CSS/JS frontend, no build step.
 - `GET /api/recalls/:recall_number` — a single recall record, including the full raw openFDA payload.
 - `GET /api/stats` — counts by classification and state, total count, most recent date.
 - `GET /api/news` — paginated list of news articles, newest first, 30 per page. `?page=` (default 1). Response includes a `pagination` object (`page`, `pageSize`, `total`, `totalPages`).
-- `GET /api/logo?firm=` — proxies a firm's logo from logo.dev (used by the frontend, not meant for direct browsing).
+- `GET /api/logo?firm=` — proxies a firm's logo from logo.dev (used by the frontend, not meant for direct browsing). If a firm gets the wrong logo, add its exact firm name and company domain to `config/logo-domains.json` to look it up by domain instead of by name.
 
 ## Tests
 

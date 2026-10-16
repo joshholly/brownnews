@@ -1,5 +1,12 @@
+import { readFileSync } from 'node:fs';
 import { Router } from 'express';
 import { query } from './db.js';
+
+// Firm name (exactly as openFDA reports it) -> company domain. Firms listed here
+// get their logo looked up by domain instead of by logo.dev's fuzzy name search.
+const LOGO_DOMAINS = JSON.parse(
+  readFileSync(new URL('../config/logo-domains.json', import.meta.url), 'utf8')
+);
 
 const DISCLAIMER =
   'Data sourced from openFDA and may be incomplete or delayed. Not medical advice. ' +
@@ -126,7 +133,9 @@ router.get('/logo', async (req, res) => {
   }
 
   try {
-    const logoUrl = `https://img.logo.dev/name/${encodeURIComponent(firm)}?token=${process.env.LOGO_DEV_TOKEN}`;
+    const domain = LOGO_DOMAINS[firm];
+    const lookup = domain ? encodeURIComponent(domain) : `name/${encodeURIComponent(firm)}`;
+    const logoUrl = `https://img.logo.dev/${lookup}?token=${process.env.LOGO_DEV_TOKEN}`;
     const logoResponse = await fetch(logoUrl);
 
     if (!logoResponse.ok) {

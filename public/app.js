@@ -249,6 +249,7 @@ function renderRecallCard(recall) {
     '<p class="reason"></p>' +
     '<p class="distribution"></p>' +
     '<p class="dates"></p>' +
+    '<details class="code-info"><summary>Affected lots / codes</summary><p></p></details>' +
     '<a class="source-link" target="_blank" rel="noopener">View source record (openFDA)</a>';
 
   card.querySelector('.badge').textContent = recall.classification ?? 'Unclassified';
@@ -270,6 +271,14 @@ function renderRecallCard(recall) {
   card.querySelector('.distribution').textContent = `Distribution: ${recall.distribution ?? 'Unknown'}`;
   card.querySelector('.dates').textContent =
     `Initiated: ${formatDate(recall.initiation_date)} · Reported: ${formatDate(recall.report_date)}`;
+
+  const codeInfo = card.querySelector('.code-info');
+  if (recall.code_info) {
+    codeInfo.querySelector('p').textContent = recall.code_info;
+  } else {
+    codeInfo.remove();
+  }
+
   card.querySelector('.source-link').href = sourceRecordUrl(recall.recall_number);
 
   return card;
